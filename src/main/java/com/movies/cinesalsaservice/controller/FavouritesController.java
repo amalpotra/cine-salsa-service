@@ -2,6 +2,7 @@ package com.movies.cinesalsaservice.controller;
 
 import com.movies.cinesalsaservice.constant.ContentType;
 import com.movies.cinesalsaservice.model.Favourite;
+import com.movies.cinesalsaservice.model.Movie;
 import com.movies.cinesalsaservice.model.view.NewFavourite;
 import com.movies.cinesalsaservice.model.view.RevisedFavourite;
 import com.movies.cinesalsaservice.service.FavouriteService;
@@ -22,8 +23,8 @@ public class FavouritesController {
     }
 
     @GetMapping("/{favouriteId}")
-    public String getFavourite(@PathVariable long favouriteId) {
-        return "Favourite: " + favouriteId;
+    public ResponseEntity<Movie> getFavourite(@PathVariable long favouriteId, @RequestParam(name = "type") ContentType contentType) {
+        return ResponseEntity.ok(favouriteService.getContent(favouriteId, contentType));
     }
 
     @PostMapping
