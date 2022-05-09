@@ -10,16 +10,23 @@ import javax.annotation.PostConstruct;
 
 @Component
 public class WebClientFactory {
+    private final WebClient.Builder webClientBuilder;
     @Value("${apiKey}")
     private String API_KEY;
 
+    public WebClientFactory(WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
+    }
+
     public WebClient getWebClientForMovie() {
-        return WebClient.create("https://api.themoviedb.org/3/movie");
+        return webClientBuilder.baseUrl("https://api.themoviedb.org/3/movie").build();
     }
 
     @PostConstruct
     private void init() {
-        WebClient.create("https://api.themoviedb.org/3/healthcheck")
+        webClientBuilder
+                .baseUrl("https://api.themoviedb.org/3/healthcheck")
+                .build()
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("api_key", API_KEY)

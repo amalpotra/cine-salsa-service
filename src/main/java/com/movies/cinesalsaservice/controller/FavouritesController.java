@@ -14,8 +14,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("api/v1/favourites")
 public class FavouritesController {
-    @Autowired
-    private FavouriteService favouriteService;
+    private final FavouriteService favouriteService;
+
+    public FavouritesController(FavouriteService favouriteService) {
+        this.favouriteService = favouriteService;
+    }
 
     @GetMapping
     public String getAllFavourites(@RequestParam(name = "type") ContentType contentType) {
@@ -31,12 +34,12 @@ public class FavouritesController {
     public ResponseEntity<Favourite> newFavourite(@RequestBody NewFavourite newFavourite) {
         Favourite favourite = favouriteService.newFavourite(newFavourite);
         return ResponseEntity.created(
-                        ServletUriComponentsBuilder
-                                .fromCurrentRequest()
-                                .path("/{id}")
-                                .buildAndExpand(favourite.getId())
-                                .toUri()
-                ).body(favourite);
+                ServletUriComponentsBuilder
+                        .fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(favourite.getId())
+                        .toUri()
+        ).body(favourite);
     }
 
     @PutMapping("/{favouriteId}")

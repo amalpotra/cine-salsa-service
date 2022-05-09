@@ -11,7 +11,6 @@ import com.movies.cinesalsaservice.model.view.NewFavourite;
 import com.movies.cinesalsaservice.model.view.RevisedFavourite;
 import com.movies.cinesalsaservice.repository.FavouriteRepository;
 import com.movies.cinesalsaservice.service.external.ExternalMovieService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,10 +19,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class FavouriteService {
-    @Autowired
-    private FavouriteRepository favouriteRepository;
-    @Autowired
-    private ExternalMovieService externalMovieService;
+    private final FavouriteRepository favouriteRepository;
+    private final ExternalMovieService externalMovieService;
+
+    public FavouriteService(FavouriteRepository favouriteRepository, ExternalMovieService externalMovieService) {
+        this.favouriteRepository = favouriteRepository;
+        this.externalMovieService = externalMovieService;
+    }
 
     public Favourite newFavourite(NewFavourite newFavourite) {
         Optional<Favourite> optionalFavourite = favouriteRepository.findFirstByContentTypeAndContentId(newFavourite.getContentType(), newFavourite.getContentId());
@@ -73,24 +75,24 @@ public class FavouriteService {
             Favourite favourite = optionalFavourite.get();
             if (contentType == ContentType.MOVIE) {
                 ExternalMovie externalMovie = externalMovieService.fetchMovie(favourite.getContentId());
-                    return Movie.builder()
-                            .adult(externalMovie.getAdult())
-                            .backdrop_path(externalMovie.getBackdrop_path())
-                            .genre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))
-                            .id(externalMovie.getId())
-                            .original_language(externalMovie.getOriginal_language())
-                            .original_title(externalMovie.getOriginal_title())
-                            .overview(externalMovie.getOverview())
-                            .popularity(externalMovie.getPopularity())
-                            .poster_path(externalMovie.getPoster_path())
-                            .release_date(externalMovie.getRelease_date())
-                            .title(externalMovie.getTitle())
-                            .video(externalMovie.getVideo())
-                            .vote_average(externalMovie.getVote_average())
-                            .vote_count(externalMovie.getVote_count())
-                            .favourite(favourite)
-                            .build();
-                }
+                return Movie.builder()
+                        .adult(externalMovie.getAdult())
+                        .backdrop_path(externalMovie.getBackdrop_path())
+                        .genre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))
+                        .id(externalMovie.getId())
+                        .original_language(externalMovie.getOriginal_language())
+                        .original_title(externalMovie.getOriginal_title())
+                        .overview(externalMovie.getOverview())
+                        .popularity(externalMovie.getPopularity())
+                        .poster_path(externalMovie.getPoster_path())
+                        .release_date(externalMovie.getRelease_date())
+                        .title(externalMovie.getTitle())
+                        .video(externalMovie.getVideo())
+                        .vote_average(externalMovie.getVote_average())
+                        .vote_count(externalMovie.getVote_count())
+                        .favourite(favourite)
+                        .build();
+            }
         }
         throw new ResourceNotFoundException("Favourite doesn't exists!");
     }

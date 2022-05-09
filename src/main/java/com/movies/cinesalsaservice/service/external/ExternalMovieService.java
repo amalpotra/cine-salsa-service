@@ -2,17 +2,19 @@ package com.movies.cinesalsaservice.service.external;
 
 import com.movies.cinesalsaservice.exception.FailedDependencyException;
 import com.movies.cinesalsaservice.model.external.ExternalMovie;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ExternalMovieService {
-    @Autowired
-    private WebClientFactory webClientFactory;
+    private final WebClientFactory webClientFactory;
     @Value("${apiKey}")
     private String API_KEY;
+
+    public ExternalMovieService(WebClientFactory webClientFactory) {
+        this.webClientFactory = webClientFactory;
+    }
 
     public ExternalMovie fetchMovie(Long movieId) {
         return webClientFactory.getWebClientForMovie()

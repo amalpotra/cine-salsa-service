@@ -12,7 +12,6 @@ import com.movies.cinesalsaservice.model.view.RevisedFavourite;
 import com.movies.cinesalsaservice.repository.FavouriteRepository;
 import com.movies.cinesalsaservice.service.external.ExternalMovieService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -27,7 +26,8 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = FavouriteService.class)
 public class FavouriteServiceTest {
-    Favourite favourite = Favourite.builder()
+    private final FavouriteService favouriteService;
+    private final Favourite favourite = Favourite.builder()
             .id(1L)
             .contentType(ContentType.MOVIE)
             .contentId(12345L)
@@ -35,22 +35,17 @@ public class FavouriteServiceTest {
             .comments("A great movie to watch")
             .lastModified(LocalDateTime.now())
             .build();
-
-    NewFavourite newFavourite = NewFavourite.builder()
+    private final NewFavourite newFavourite = NewFavourite.builder()
             .contentType(ContentType.MOVIE)
             .contentId(12345L)
             .rating(8)
             .comments("A great movie to watch")
             .build();
-
-    RevisedFavourite revisedFavourite = RevisedFavourite.builder()
+    private final RevisedFavourite revisedFavourite = RevisedFavourite.builder()
             .rating(8)
             .comments("A great movie to watch")
             .build();
-
-    Long favouriteId = 1L;
-
-    ExternalMovie externalMovie = ExternalMovie.builder()
+    private final ExternalMovie externalMovie = ExternalMovie.builder()
             .adult(false)
             .backdrop_path("/sample-path")
             .genres(List.of(Genre.builder()
@@ -70,13 +65,15 @@ public class FavouriteServiceTest {
             .vote_average(7.8F)
             .vote_count(5011L)
             .build();
-
+    Long favouriteId = 1L;
     @MockBean
     private FavouriteRepository favouriteRepository;
     @MockBean
     private ExternalMovieService externalMovieService;
-    @Autowired
-    private FavouriteService favouriteService;
+
+    public FavouriteServiceTest(FavouriteService favouriteService) {
+        this.favouriteService = favouriteService;
+    }
 
     @Test
     public void returnFavouriteOnSavingIt() {
@@ -141,9 +138,9 @@ public class FavouriteServiceTest {
         Movie returnedMovie = favouriteService.getContent(favouriteId, favourite.getContentType());
 
         assertAll("Should return correct favourite movie",
-                ()->assertEquals(favouriteId, returnedMovie.getFavourite().getId()),
-                ()->assertEquals(favourite.getContentType(), returnedMovie.getFavourite().getContentType()),
-                ()->assertEquals(favourite.getContentId(), returnedMovie.getId())
+                () -> assertEquals(favouriteId, returnedMovie.getFavourite().getId()),
+                () -> assertEquals(favourite.getContentType(), returnedMovie.getFavourite().getContentType()),
+                () -> assertEquals(favourite.getContentId(), returnedMovie.getId())
         );
     }
 
