@@ -32,15 +32,14 @@ public class FavouriteService {
     public Favourite newFavourite(NewFavourite newFavourite) {
         Optional<Favourite> optionalFavourite = favouriteRepository.findFirstByContentTypeAndContentId(newFavourite.getContentType(), newFavourite.getContentId());
         if (optionalFavourite.isEmpty()) {
-            return favouriteRepository.save(
-                    Favourite.builder()
-                            .contentType(newFavourite.getContentType())
-                            .contentId(newFavourite.getContentId())
-                            .rating(newFavourite.getRating())
-                            .comments(newFavourite.getComments())
-                            .lastModified(LocalDateTime.now())
-                            .build()
-            );
+            Favourite favourite = new Favourite();
+            favourite.setContentType(newFavourite.getContentType());
+            favourite.setContentId(newFavourite.getContentId());
+            favourite.setRating(newFavourite.getRating());
+            favourite.setComments(newFavourite.getComments());
+            favourite.setLastModified(LocalDateTime.now());
+
+            return favouriteRepository.save(favourite);
         }
         throw new ResourceConflictException("Favourite already exists!");
     }
@@ -49,16 +48,11 @@ public class FavouriteService {
         Optional<Favourite> optionalFavourite = favouriteRepository.findById(favouriteId);
         if (optionalFavourite.isPresent()) {
             Favourite favourite = optionalFavourite.get();
-            return favouriteRepository.save(
-                    Favourite.builder()
-                            .id(favourite.getId())
-                            .contentType(favourite.getContentType())
-                            .contentId(favourite.getContentId())
-                            .rating(revisedFavourite.getRating())
-                            .comments(revisedFavourite.getComments())
-                            .lastModified(LocalDateTime.now())
-                            .build()
-            );
+            favourite.setRating(revisedFavourite.getRating());
+            favourite.setComments(revisedFavourite.getComments());
+            favourite.setLastModified(LocalDateTime.now());
+
+            return favouriteRepository.save(favourite);
         }
         throw new ResourceNotFoundException("Favourite doesn't exists!");
     }
@@ -73,57 +67,62 @@ public class FavouriteService {
 
     public Movie getContent(Long favouriteId, ContentType contentType) {
         Optional<Favourite> optionalFavourite = favouriteRepository.findById(favouriteId);
-        if (optionalFavourite.isPresent()) {
-            Favourite favourite = optionalFavourite.get();
+
+        Optional<Integer> opt = Optional.ofNullable(null);
+
+        return optionalFavourite.map( favourite -> {
+
             if (contentType == ContentType.MOVIE) {
+                Movie movie = new Movie();
                 ExternalMovie externalMovie = externalMovieService.fetchMovie(favourite.getContentId());
-                return Movie.builder()
-                        .adult(externalMovie.getAdult())
-                        .backdrop_path(externalMovie.getBackdrop_path())
-                        .genre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))
-                        .id(externalMovie.getId())
-                        .original_language(externalMovie.getOriginal_language())
-                        .original_title(externalMovie.getOriginal_title())
-                        .overview(externalMovie.getOverview())
-                        .popularity(externalMovie.getPopularity())
-                        .poster_path(externalMovie.getPoster_path())
-                        .release_date(externalMovie.getRelease_date())
-                        .title(externalMovie.getTitle())
-                        .video(externalMovie.getVideo())
-                        .vote_average(externalMovie.getVote_average())
-                        .vote_count(externalMovie.getVote_count())
-                        .favourite(favourite)
-                        .build();
-            }
-        }
-        throw new ResourceNotFoundException("Favourite doesn't exists!");
+
+                movie.setAdult(externalMovie.getAdult());
+                movie.setBackdrop_path(externalMovie.getBackdrop_path());
+                movie.setGenre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()));
+                movie.setId(externalMovie.getId());
+                movie.setOriginal_language(externalMovie.getOriginal_language());
+                movie.setOriginal_title(externalMovie.getOriginal_title());
+                movie.setOverview(externalMovie.getOverview());
+                movie.setPopularity(externalMovie.getPopularity());
+                movie.setPoster_path(externalMovie.getPoster_path());
+                movie.setRelease_date(externalMovie.getRelease_date());
+                movie.setTitle(externalMovie.getTitle());
+                movie.setVideo(externalMovie.getVideo());
+                movie.setVote_average(externalMovie.getVote_average());
+                movie.setVote_count(externalMovie.getVote_count());
+                movie.setFavourite(favourite);
+
+                return movie;
+            } else
+                throw  new UnsupportedOperationException();
+        }).orElseThrow( () -> new ResourceNotFoundException("Favourite doesn't exists!"));
+
+
     }
 
     public List<Movie> getAllContent(ContentType contentType) {
-        List<Movie> movieList = new ArrayList<>();
         List<Favourite> favouriteList = favouriteRepository.findAll();
-        favouriteList.forEach(favourite -> {
+        return favouriteList.stream().map(favourite -> {
             ExternalMovie externalMovie = externalMovieService.fetchMovie(favourite.getContentId());
-            movieList.add(
-                    Movie.builder()
-                    .adult(externalMovie.getAdult())
-                    .backdrop_path(externalMovie.getBackdrop_path())
-                    .genre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))
-                    .id(externalMovie.getId())
-                    .original_language(externalMovie.getOriginal_language())
-                    .original_title(externalMovie.getOriginal_title())
-                    .overview(externalMovie.getOverview())
-                    .popularity(externalMovie.getPopularity())
-                    .poster_path(externalMovie.getPoster_path())
-                    .release_date(externalMovie.getRelease_date())
-                    .title(externalMovie.getTitle())
-                    .video(externalMovie.getVideo())
-                    .vote_average(externalMovie.getVote_average())
-                    .vote_count(externalMovie.getVote_count())
-                    .favourite(favourite)
-                    .build()
-            );
-        });
-        return movieList;
+
+            Movie movie = new Movie();
+            movie.setAdult(externalMovie.getAdult());
+            movie.setBackdrop_path(externalMovie.getBackdrop_path());
+            movie.setGenre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()));
+            movie.setId(externalMovie.getId());
+            movie.setOriginal_language(externalMovie.getOriginal_language());
+            movie.setOriginal_title(externalMovie.getOriginal_title());
+            movie.setOverview(externalMovie.getOverview());
+            movie.setPopularity(externalMovie.getPopularity());
+            movie.setPoster_path(externalMovie.getPoster_path());
+            movie.setRelease_date(externalMovie.getRelease_date());
+            movie.setTitle(externalMovie.getTitle());
+            movie.setVideo(externalMovie.getVideo());
+            movie.setVote_average(externalMovie.getVote_average());
+            movie.setVote_count(externalMovie.getVote_count());
+            movie.setFavourite(favourite);
+
+           return movie;
+        }).collect(Collectors.toList());
     }
 }
