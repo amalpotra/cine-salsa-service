@@ -6,11 +6,11 @@ import com.movies.cinesalsaservice.model.Movie;
 import com.movies.cinesalsaservice.model.view.NewFavourite;
 import com.movies.cinesalsaservice.model.view.RevisedFavourite;
 import com.movies.cinesalsaservice.service.FavouriteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -33,7 +33,7 @@ public class FavouritesController {
     }
 
     @PostMapping
-    public ResponseEntity<Favourite> newFavourite(@RequestBody NewFavourite newFavourite) {
+    public ResponseEntity<Favourite> newFavourite(@RequestBody @Valid NewFavourite newFavourite) {
         Favourite favourite = favouriteService.newFavourite(newFavourite);
         return ResponseEntity.created(
                 ServletUriComponentsBuilder
@@ -45,7 +45,7 @@ public class FavouritesController {
     }
 
     @PutMapping("/{favouriteId}")
-    public ResponseEntity<Favourite> reviseFavourite(@PathVariable long favouriteId, @RequestBody RevisedFavourite revisedFavourite) {
+    public ResponseEntity<Favourite> reviseFavourite(@PathVariable long favouriteId, @RequestBody @Valid RevisedFavourite revisedFavourite) {
         return ResponseEntity.ok(favouriteService.reviseFavourite(favouriteId, revisedFavourite));
     }
 
