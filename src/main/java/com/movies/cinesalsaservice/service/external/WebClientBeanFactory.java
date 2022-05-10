@@ -25,7 +25,7 @@ public class WebClientBeanFactory {
     }
 
     @PostConstruct
-    private void warmUp() {
+    private void warmUpCallToWebClient() {
         webClientBuilder
                 .baseUrl("https://api.themoviedb.org/3/healthcheck")
                 .build()

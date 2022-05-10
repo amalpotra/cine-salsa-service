@@ -14,7 +14,6 @@ import com.movies.cinesalsaservice.service.external.ExternalMovieService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,10 +67,7 @@ public class FavouriteService {
     public Movie getContent(Long favouriteId, ContentType contentType) {
         Optional<Favourite> optionalFavourite = favouriteRepository.findById(favouriteId);
 
-        Optional<Integer> opt = Optional.ofNullable(null);
-
-        return optionalFavourite.map( favourite -> {
-
+        return optionalFavourite.map(favourite -> {
             if (contentType == ContentType.MOVIE) {
                 Movie movie = new Movie();
                 ExternalMovie externalMovie = externalMovieService.fetchMovie(favourite.getContentId());
@@ -94,14 +90,13 @@ public class FavouriteService {
 
                 return movie;
             } else
-                throw  new UnsupportedOperationException();
-        }).orElseThrow( () -> new ResourceNotFoundException("Favourite doesn't exists!"));
-
-
+                throw new UnsupportedOperationException("Unknown content type!");
+        }).orElseThrow(() -> new ResourceNotFoundException("Favourite doesn't exists!"));
     }
 
     public List<Movie> getAllContent(ContentType contentType) {
         List<Favourite> favouriteList = favouriteRepository.findAll();
+
         return favouriteList.stream().map(favourite -> {
             ExternalMovie externalMovie = externalMovieService.fetchMovie(favourite.getContentId());
 
@@ -122,7 +117,7 @@ public class FavouriteService {
             movie.setVote_count(externalMovie.getVote_count());
             movie.setFavourite(favourite);
 
-           return movie;
+            return movie;
         }).collect(Collectors.toList());
     }
 }
