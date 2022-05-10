@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/favourites")
 public class FavouritesController {
@@ -21,8 +23,8 @@ public class FavouritesController {
     }
 
     @GetMapping
-    public String getAllFavourites(@RequestParam(name = "type") ContentType contentType) {
-        return "All Favourites with type: " + contentType;
+    public ResponseEntity<List<Movie>> getAllFavourites(@RequestParam(name = "type") ContentType contentType) {
+        return ResponseEntity.ok(favouriteService.getAllContent(contentType));
     }
 
     @GetMapping("/{favouriteId}")

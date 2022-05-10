@@ -12,6 +12,10 @@ import com.movies.cinesalsaservice.model.view.RevisedFavourite;
 import com.movies.cinesalsaservice.repository.FavouriteRepository;
 import com.movies.cinesalsaservice.service.external.ExternalMovieService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -33,6 +37,14 @@ public class FavouriteServiceTest {
             .contentId(12345L)
             .rating(8)
             .comments("A great movie to watch")
+            .lastModified(LocalDateTime.now())
+            .build();
+    private final Favourite favourite1 = Favourite.builder()
+            .id(2L)
+            .contentType(ContentType.MOVIE)
+            .contentId(67890L)
+            .rating(6)
+            .comments("Not a great movie to watch")
             .lastModified(LocalDateTime.now())
             .build();
     private final NewFavourite newFavourite = NewFavourite.builder()
@@ -65,12 +77,17 @@ public class FavouriteServiceTest {
             .vote_average(7.8F)
             .vote_count(5011L)
             .build();
+    private final List<Movie> movieList = List.of(
+            Movie.builder().id(12345L).build(),
+            Movie.builder().id(12345L).build()
+    );
     Long favouriteId = 1L;
     @MockBean
     private FavouriteRepository favouriteRepository;
     @MockBean
     private ExternalMovieService externalMovieService;
 
+    @Autowired
     public FavouriteServiceTest(FavouriteService favouriteService) {
         this.favouriteService = favouriteService;
     }
@@ -149,5 +166,18 @@ public class FavouriteServiceTest {
         when(favouriteRepository.findById(favouriteId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> favouriteService.getContent(favouriteId, favourite.getContentType()));
+    }
+
+    @Test
+    public void returnAllAvailableFavouriteMovies() {
+        when(favouriteRepository.findAll()).thenReturn(List.of(favourite, favourite1));
+        when(externalMovieService.fetchMovie(argThat(contentId -> contentId.equals(favourite.getContentId()) || contentId.equals(favourite1.getContentId())))).thenReturn(externalMovie);
+
+        List<Movie> returnedMovieList = favouriteService.getAllContent(favourite.getContentType());
+
+        assertAll(
+                () -> assertEquals(2, returnedMovieList.size()),
+                () -> verify(externalMovieService, times(2)).fetchMovie(argThat(contentId -> contentId.equals(favourite.getContentId()) || contentId.equals(favourite1.getContentId())))
+        );
     }
 }

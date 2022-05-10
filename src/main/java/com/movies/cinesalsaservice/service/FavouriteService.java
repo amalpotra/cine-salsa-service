@@ -14,6 +14,8 @@ import com.movies.cinesalsaservice.service.external.ExternalMovieService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,5 +97,33 @@ public class FavouriteService {
             }
         }
         throw new ResourceNotFoundException("Favourite doesn't exists!");
+    }
+
+    public List<Movie> getAllContent(ContentType contentType) {
+        List<Movie> movieList = new ArrayList<>();
+        List<Favourite> favouriteList = favouriteRepository.findAll();
+        favouriteList.forEach(favourite -> {
+            ExternalMovie externalMovie = externalMovieService.fetchMovie(favourite.getContentId());
+            movieList.add(
+                    Movie.builder()
+                    .adult(externalMovie.getAdult())
+                    .backdrop_path(externalMovie.getBackdrop_path())
+                    .genre_ids(externalMovie.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))
+                    .id(externalMovie.getId())
+                    .original_language(externalMovie.getOriginal_language())
+                    .original_title(externalMovie.getOriginal_title())
+                    .overview(externalMovie.getOverview())
+                    .popularity(externalMovie.getPopularity())
+                    .poster_path(externalMovie.getPoster_path())
+                    .release_date(externalMovie.getRelease_date())
+                    .title(externalMovie.getTitle())
+                    .video(externalMovie.getVideo())
+                    .vote_average(externalMovie.getVote_average())
+                    .vote_count(externalMovie.getVote_count())
+                    .favourite(favourite)
+                    .build()
+            );
+        });
+        return movieList;
     }
 }

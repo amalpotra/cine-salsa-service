@@ -2,6 +2,7 @@ package com.movies.cinesalsaservice.service.external;
 
 import com.movies.cinesalsaservice.exception.ServiceUnavailableException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -9,16 +10,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.annotation.PostConstruct;
 
 @Component
-public class WebClientFactory {
+public class WebClientBeanFactory {
     private final WebClient.Builder webClientBuilder;
     @Value("${apiKey}")
     private String API_KEY;
 
-    public WebClientFactory(WebClient.Builder webClientBuilder) {
+    public WebClientBeanFactory(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
-    public WebClient getWebClientForMovie() {
+    @Bean
+    public WebClient webClientForMovie() {
         return webClientBuilder.baseUrl("https://api.themoviedb.org/3/movie").build();
     }
 

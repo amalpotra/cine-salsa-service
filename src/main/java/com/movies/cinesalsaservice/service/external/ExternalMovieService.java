@@ -5,19 +5,20 @@ import com.movies.cinesalsaservice.model.external.ExternalMovie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class ExternalMovieService {
-    private final WebClientFactory webClientFactory;
+    private final WebClient webClientForMovie;
     @Value("${apiKey}")
     private String API_KEY;
 
-    public ExternalMovieService(WebClientFactory webClientFactory) {
-        this.webClientFactory = webClientFactory;
+    public ExternalMovieService(WebClient webClientForMovie) {
+        this.webClientForMovie = webClientForMovie;
     }
 
     public ExternalMovie fetchMovie(Long movieId) {
-        return webClientFactory.getWebClientForMovie()
+        return webClientForMovie
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/{movieId}")
