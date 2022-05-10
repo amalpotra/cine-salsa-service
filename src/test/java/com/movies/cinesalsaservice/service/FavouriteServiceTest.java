@@ -11,10 +11,8 @@ import com.movies.cinesalsaservice.model.view.NewFavourite;
 import com.movies.cinesalsaservice.model.view.RevisedFavourite;
 import com.movies.cinesalsaservice.repository.FavouriteRepository;
 import com.movies.cinesalsaservice.service.external.ExternalMovieService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,58 +28,13 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = FavouriteService.class)
 public class FavouriteServiceTest {
+    private static final Favourite favourite = new Favourite();
+    private static final Favourite favourite1 = new Favourite();
+    private static final NewFavourite newFavourite = new NewFavourite();
+    private static final RevisedFavourite revisedFavourite = new RevisedFavourite();
+    private static final ExternalMovie externalMovie = new ExternalMovie();
+    private static Long favouriteId;
     private final FavouriteService favouriteService;
-    private final Favourite favourite = Favourite.builder()
-            .id(1L)
-            .contentType(ContentType.MOVIE)
-            .contentId(12345L)
-            .rating(8)
-            .comments("A great movie to watch")
-            .lastModified(LocalDateTime.now())
-            .build();
-    private final Favourite favourite1 = Favourite.builder()
-            .id(2L)
-            .contentType(ContentType.MOVIE)
-            .contentId(67890L)
-            .rating(6)
-            .comments("Not a great movie to watch")
-            .lastModified(LocalDateTime.now())
-            .build();
-    private final NewFavourite newFavourite = NewFavourite.builder()
-            .contentType(ContentType.MOVIE)
-            .contentId(12345L)
-            .rating(8)
-            .comments("A great movie to watch")
-            .build();
-    private final RevisedFavourite revisedFavourite = RevisedFavourite.builder()
-            .rating(8)
-            .comments("A great movie to watch")
-            .build();
-    private final ExternalMovie externalMovie = ExternalMovie.builder()
-            .adult(false)
-            .backdrop_path("/sample-path")
-            .genres(List.of(Genre.builder()
-                    .id(1)
-                    .name("Action")
-                    .build())
-            )
-            .id(12345L)
-            .original_language("en")
-            .original_title("A Movie")
-            .overview("A nice description")
-            .popularity(5011.11F)
-            .poster_path("/sample-path")
-            .release_date(LocalDate.of(2021, 3, 1))
-            .title("Movie Name")
-            .video(false)
-            .vote_average(7.8F)
-            .vote_count(5011L)
-            .build();
-    private final List<Movie> movieList = List.of(
-            Movie.builder().id(12345L).build(),
-            Movie.builder().id(12345L).build()
-    );
-    Long favouriteId = 1L;
     @MockBean
     private FavouriteRepository favouriteRepository;
     @MockBean
@@ -90,6 +43,56 @@ public class FavouriteServiceTest {
     @Autowired
     public FavouriteServiceTest(FavouriteService favouriteService) {
         this.favouriteService = favouriteService;
+    }
+
+    // Utilities
+
+    @BeforeAll
+    static void init() {
+        setupFavourite(favourite, 1L, ContentType.MOVIE, 12345L, 8, "A great movie to watch", LocalDateTime.now());
+        setupFavourite(favourite1, 2L, ContentType.MOVIE, 67890L, 6, "Not a great movie to watch", LocalDateTime.now());
+        setupNewFavourite();
+        setupRevisedFavourite();
+        setupExternalMovie();
+        favouriteId = 1L;
+    }
+
+    private static void setupExternalMovie() {
+        externalMovie.setAdult(false);
+        externalMovie.setBackdrop_path("/sample-path");
+        externalMovie.setGenres(List.of(new Genre(1, "Action")));
+        externalMovie.setId(12345L);
+        externalMovie.setOriginal_language("en");
+        externalMovie.setOriginal_title("A Movie");
+        externalMovie.setOverview("A nice description");
+        externalMovie.setPopularity(5011.11F);
+        externalMovie.setPoster_path("/sample-path");
+        externalMovie.setRelease_date(LocalDate.of(2021, 3, 1));
+        externalMovie.setTitle("Movie Name");
+        externalMovie.setVideo(false);
+        externalMovie.setVote_average(7.8F);
+        externalMovie.setVote_count(5011L);
+    }
+
+    private static void setupRevisedFavourite() {
+        revisedFavourite.setRating(8);
+        revisedFavourite.setComments("A great movie to watch");
+    }
+
+    private static void setupNewFavourite() {
+        newFavourite.setContentType(ContentType.MOVIE);
+        newFavourite.setContentId(12345L);
+        newFavourite.setRating(8);
+        newFavourite.setComments("A great movie to watch");
+    }
+
+    private static void setupFavourite(Favourite favourite, long id, ContentType contentType, long contentId, int rating, String comments, LocalDateTime dateTime) {
+        favourite.setId(id);
+        favourite.setContentType(contentType);
+        favourite.setContentId(contentId);
+        favourite.setRating(rating);
+        favourite.setComments(comments);
+        favourite.setLastModified(dateTime);
     }
 
     @Test
