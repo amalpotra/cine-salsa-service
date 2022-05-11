@@ -33,6 +33,7 @@ public class FavouriteServiceTest {
     private static final NewFavourite newFavourite = new NewFavourite();
     private static final RevisedFavourite revisedFavourite = new RevisedFavourite();
     private static final ExternalMovie externalMovie = new ExternalMovie();
+    private static final ExternalMovie externalMovie1 = new ExternalMovie();
     private static Long favouriteId;
     private final FavouriteService favouriteService;
     @MockBean
@@ -72,6 +73,20 @@ public class FavouriteServiceTest {
         externalMovie.setVideo(false);
         externalMovie.setVote_average(7.8F);
         externalMovie.setVote_count(5011L);
+
+        externalMovie1.setBackdrop_path("/sample-path");
+        externalMovie1.setGenres(List.of(new Genre(2, "Drama")));
+        externalMovie1.setId(67890L);
+        externalMovie1.setOriginal_language("FR");
+        externalMovie1.setOriginal_title("Another Movie");
+        externalMovie1.setOverview("Another nice description");
+        externalMovie1.setPopularity(3011.11F);
+        externalMovie1.setPoster_path("/sample-path");
+        externalMovie1.setRelease_date(LocalDate.of(2021, 7, 11));
+        externalMovie1.setTitle("Another Movie Name");
+        externalMovie1.setVideo(false);
+        externalMovie1.setVote_average(4.8F);
+        externalMovie1.setVote_count(3011L);
     }
 
     private static void setupRevisedFavourite() {
@@ -174,13 +189,20 @@ public class FavouriteServiceTest {
     @Test
     public void returnAllAvailableFavouriteMovies() {
         when(favouriteRepository.findAll()).thenReturn(List.of(favourite, favourite1));
-        when(externalMovieService.fetchMovie(argThat(contentId -> contentId.equals(favourite.getContentId()) || contentId.equals(favourite1.getContentId())))).thenReturn(externalMovie);
+        when(externalMovieService.fetchMovie(favourite.getContentId())).thenReturn(externalMovie);
+        when(externalMovieService.fetchMovie(favourite1.getContentId())).thenReturn(externalMovie1);
 
         List<Movie> returnedMovieList = favouriteService.getAllContent(favourite.getContentType());
 
         assertAll(
                 () -> assertEquals(2, returnedMovieList.size()),
-                () -> verify(externalMovieService, times(2)).fetchMovie(argThat(contentId -> contentId.equals(favourite.getContentId()) || contentId.equals(favourite1.getContentId())))
+                () -> verify(externalMovieService, times(2)).fetchMovie(argThat(contentId -> contentId.equals(favourite.getContentId()) || contentId.equals(favourite1.getContentId()))),
+                () -> assertEquals(favourite.getId(), returnedMovieList.get(0).getFavourite().getId()),
+                () -> assertEquals(favourite1.getId(), returnedMovieList.get(1).getFavourite().getId()),
+                () -> assertEquals(favourite.getContentId(), returnedMovieList.get(0).getId()),
+                () -> assertEquals(favourite1.getContentId(), returnedMovieList.get(1).getId()),
+                () -> assertEquals(externalMovie.getTitle(), returnedMovieList.get(0).getTitle()),
+                () -> assertEquals(externalMovie1.getTitle(), returnedMovieList.get(1).getTitle())
         );
     }
 }
